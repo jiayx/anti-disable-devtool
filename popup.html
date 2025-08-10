@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anti Disable DevTool</title>
+  <style>
+    body {
+      width: 350px;
+      min-height: 400px;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .container {
+      padding: 20px;
+      color: white;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+      }
+    }
+
+    .toggle-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 48px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.3);
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #4ade80;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 20px;
+    }
+
+    .footer a {
+      color: white;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .footer a:hover {
+      border-bottom-color: white;
+    }
+
+    .strategy-container {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .strategy-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      opacity: 0.9;
+    }
+
+    .strategy-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      transition: background 0.3s;
+    }
+
+    .radio-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .radio-option input[type="radio"] {
+      margin-right: 10px;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .radio-label {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .radio-title {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .radio-desc {
+      font-size: 11px;
+      opacity: 0.7;
+      line-height: 1.3;
+    }
+
+    .radio-option input[type="radio"]:checked + .radio-label .radio-title {
+      color: #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">🛡️ Anti Disable DevTool</div>
+      <div class="subtitle">保护您的开发者工具自由</div>
+    </div>
+
+    <div id="blocked-count"></div>
+    <div id="protected-sites"></div>
+    <div id="run-time"></div>
+    <div class="toggle-container">
+      <div class="toggle-row">
+        <span class="toggle-label">启用保护</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="enable-protection" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="strategy-container">
+      <div class="strategy-title">🎯 选择策略</div>
+      <div class="strategy-options">
+        <label class="radio-option">
+          <input type="radio" name="strategy" value="isProd" id="strategy-isProd" checked>
+          <span class="radio-label">
+            <span class="radio-title">isProd 拦截</span>
+            <span class="radio-desc">适用于家乐联，高效轻量</span>
+          </span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="strategy" value="timer" id="strategy-timer">
+          <span class="radio-label">
+            <span class="radio-title">定时器劫持</span>
+            <span class="radio-desc">适用于于大多数网站，提供 timer 调试工具</span>
+          </span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="strategy" value="both" id="strategy-both">
+          <span class="radio-label">
+            <span class="radio-title">双重保护</span>
+            <span class="radio-desc">同时启用两种策略</span>
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div>v1.0.0</div>
+      <div style="margin-top: 5px;">
+        什么是 <a href="https://github.com/theajack/disable-devtool" target="_blank">disable-devtool</a> ？
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

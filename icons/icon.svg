@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="128" height="128" rx="20" fill="url(#bg)"/>
+  
+  <!-- 盾牌形状 -->
+  <path d="M64 20 L40 35 L40 75 L64 95 L88 75 L88 35 Z" 
+        fill="white" 
+        fill-opacity="0.9"/>
+  
+  <!-- 勾号 -->
+  <path d="M45 55 L58 68 L83 43" 
+        stroke="#4ade80" 
+        stroke-width="6" 
+        fill="none" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"/>
+</svg>
