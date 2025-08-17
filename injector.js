@@ -3,7 +3,7 @@
 (function() {
   'use strict';
 
-  console.log('[Anti-Disable-DevTool] 正在初始化...');
+  log('正在初始化...');
 
   let config = null;
   let initialized = false;
@@ -12,17 +12,17 @@
   function loadConfig() {
     try {
       const configStr = localStorage.getItem('antiDisableDevtoolConfig');
-      console.log('[Anti-Disable-DevTool] 从 localStorage 加载配置:', configStr);
+      log('从 localStorage 加载配置:', configStr);
       if (configStr) {
         config = JSON.parse(configStr);
-        console.log('[Anti-Disable-DevTool] 从 localStorage 加载配置:', config);
+        log('从 localStorage 加载配置:', config);
         return config;
       } else {
-        console.log('[Anti-Disable-DevTool] localStorage 中没有配置');
+        log('localStorage 中没有配置');
         return null;
       }
     } catch (e) {
-      console.error('[Anti-Disable-DevTool] 读取配置失败:', e);
+      error('读取配置失败:', e);
       return null;
     }
   }
@@ -30,10 +30,10 @@
   function saveConfig(config) {
     try {
       localStorage.setItem('antiDisableDevtoolConfig', JSON.stringify(config));
-      console.log('[Anti-Disable-DevTool] 保存配置到 localStorage:', config);
+      log('保存配置到 localStorage', config);
       return true;
     } catch (e) {
-      console.error('[Anti-Disable-DevTool] 保存配置失败:', e);
+      error('保存配置失败', e);
       return false;
     }
   }
@@ -48,7 +48,7 @@
       // 拦截 isProd 属性设置
       if (prop === 'isProd') {
         interceptCount++;
-        console.log(`[Anti-Disable-DevTool] 拦截 isProd 属性 #${interceptCount}，强制设为 false`);
+        log(`拦截 isProd 属性 #${interceptCount}，强制设为 false`);
 
         // 修改描述符，确保返回 false
         if (descriptor.hasOwnProperty('value')) {
@@ -56,7 +56,7 @@
           descriptor.writable = false;
         } else if (descriptor.hasOwnProperty('get')) {
           descriptor.get = function() {
-            console.log('[Anti-Disable-DevTool] isProd getter 被调用，返回 false');
+            log('isProd getter 被调用，返回 false');
             return false;
           };
         } else {
@@ -72,7 +72,7 @@
       return originalDefineProperty.call(this, obj, prop, descriptor);
     };
 
-    console.log('[Anti-Disable-DevTool] isProd 拦截器已激活 🔓');
+    log('isProd 拦截器已激活 🔓');
   };
 
 
@@ -109,7 +109,7 @@
       // 检查是否是 disable-devtool 的定时器
       if (isDisableDevtoolCode(func)) {
         blockedCount++;
-        console.log(`[Anti-Disable-DevTool] 拦截第 ${blockedCount} 个 disable-devtool 定时器 (setInterval)`);
+        log(`拦截第 ${blockedCount} 个 disable-devtool 定时器 (setInterval)`);
 
         // 返回一个假的定时器 ID
         return 999999 + blockedCount;
@@ -133,14 +133,14 @@
       // 处理字符串形式的代码
       if (typeof func === 'string' && func.includes('debugger')) {
         blockedCount++;
-        console.log(`[Anti-Disable-DevTool] 拦截第 ${blockedCount} 个 debugger 字符串 (setTimeout)`);
+        log(`拦截第 ${blockedCount} 个 debugger 字符串 (setTimeout)`);
         return 999999 + blockedCount;
       }
 
       // 检查是否是 disable-devtool 的定时器
       if (isDisableDevtoolCode(func)) {
         blockedCount++;
-        console.log(`[Anti-Disable-DevTool] 拦截第 ${blockedCount} 个 disable-devtool 定时器 (setTimeout)`);
+        log(`拦截第 ${blockedCount} 个 disable-devtool 定时器 (setTimeout)`);
         // 返回一个假的定时器 ID
         return 999999 + blockedCount;
       }
@@ -187,7 +187,7 @@
       // 遍历记录的定时器
       timerMap.forEach((info, id) => {
         if (isDisableDevtoolCode(info.func)) {
-          console.log('[Anti-Disable-DevTool] 清理可疑定时器:', id);
+          console.log('[Anti-Disable-DevTool] 清理可疑定时器', id);
           if (info.type === 'interval') {
             originalClearInterval(id);
           } else {
@@ -241,15 +241,15 @@
       }
     };
 
-    console.log('[Anti-Disable-DevTool] 定时器拦截器已激活 🔓');
-    console.log('[Anti-Disable-DevTool] 提示：使用 __antiDisableDevtool.getStats() 查看统计');
-    console.log('[Anti-Disable-DevTool] 提示：使用 __antiDisableDevtool.showTimers() 查看定时器');
+    log('定时器拦截器已激活 🔓');
+    log('提示：使用 __antiDisableDevtool.getStats() 查看统计');
+    log('提示：使用 __antiDisableDevtool.showTimers() 查看定时器');
   };
 
   // 初始化函数，根据配置启用相应功能
   function init(cfg) {
     if (initialized) {
-      console.log('[Anti-Disable-DevTool] 已经初始化，跳过');
+      log('已经初始化，跳过');
       return;
     }
 
@@ -257,11 +257,11 @@
 
     // 如果未启用保护，直接返回
     if (!config.enabled) {
-      console.log('[Anti-Disable-DevTool] 当前网站未启用保护');
+      log('当前网站未启用保护');
       return;
     }
 
-    console.log(`[Anti-Disable-DevTool] 保护已启用，策略: ${config.strategy}`);
+    log(`保护已启用，策略: ${config.strategy}`);
 
     // 根据配置的策略启用相应功能
     switch (config.strategy) {
@@ -282,6 +282,19 @@
     initialized = true;
   }
 
+  function log(msg, ...args) {
+    if (window.__antiDisableDevtoolDebug === undefined) {
+      window.__antiDisableDevtoolDebug = localStorage.getItem('antiDisableDevtoolDebug') === 'true';
+    }
+    if (window.__antiDisableDevtoolDebug) {
+      console.log(`[Anti-Disable-DevTool] ${msg}`, ...args);
+    }
+  }
+
+  function error(msg, ...args) {
+    console.error(`[Anti-Disable-DevTool] ${msg}`, ...args);
+  }
+
   // 主初始化逻辑
   function main() {
     // 尝试从 localStorage 加载配置
@@ -292,8 +305,8 @@
       init(cfg);
     } else {
       // 如果没有配置，默认不启用保护
-      console.log('[Anti-Disable-DevTool] 没有找到配置，默认不启用保护');
-      console.log('[Anti-Disable-DevTool] 请通过扩展弹窗为该网站启用保护');
+      log('没有找到配置，默认不启用保护');
+      log('请通过扩展弹窗为该网站启用保护');
     }
   }
 
@@ -301,7 +314,7 @@
     const d = e.data;
     if (e.source !== window || d?.__from !== 'ext') return;
 
-    console.log('[Anti-Disable-DevTool] injector 收到消息: ', e.data);
+    log('injector 收到消息', e.data);
 
     switch (d.action) {
       case 'saveConfig':
